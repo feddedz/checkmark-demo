@@ -1,1 +1,952 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkmark - Verify Authentic Photos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #0a0a0f;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            bottom: 10%;
+            left: 50%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .hero {
+            color: white;
+            padding: 120px 20px 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 5em;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease;
+            background: linear-gradient(135deg, #fff 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.6em;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            opacity: 0.95;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .checkmark-logo {
+            font-size: 6em;
+            margin-bottom: 20px;
+            animation: bounceIn 1s ease;
+            filter: drop-shadow(0 4px 30px rgba(255,255,255,0.4));
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .main-content {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 80px 20px;
+            margin-bottom: 60px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3.5em;
+            color: white;
+            margin-bottom: 60px;
+            font-weight: 800;
+        }
+
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-bottom: 100px;
+        }
+
+        .phone-mockup {
+            perspective: 1500px;
+            margin: 0 auto;
+        }
+
+        .phone {
+            width: 360px;
+            height: 720px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border-radius: 45px;
+            padding: 14px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+            transform: rotateY(-8deg);
+            transition: transform 0.6s ease;
+        }
+
+        .phone:hover {
+            transform: rotateY(0deg);
+        }
+
+        .phone-notch {
+            width: 160px;
+            height: 28px;
+            background: #0a0a0a;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .camera-dot {
+            width: 10px;
+            height: 10px;
+            background: #1a1a2a;
+            border-radius: 50%;
+            border: 1px solid #333;
+        }
+
+        .speaker {
+            width: 50px;
+            height: 5px;
+            background: #1a1a2a;
+            border-radius: 3px;
+            border: 1px solid #333;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 35px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 45px 20px 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .screen-content {
+            height: calc(100% - 65px);
+            overflow-y: auto;
+        }
+
+        .screen-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .home-screen {
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            padding: 30px 20px;
+            height: 100%;
+        }
+
+        .home-time {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .home-time h1 {
+            font-size: 4em;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        .home-time p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .app-icon {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .app-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .app-icon-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .checkmark-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .app-label {
+            color: white;
+            font-size: 0.7em;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .app-screen {
+            display: none;
+            background: #fff;
+            height: 100%;
+        }
+
+        .app-screen.active {
+            display: block;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 20px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .app-header h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .permission-screen {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .permission-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .permission-screen h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .permission-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .app-button {
+            background: #667eea;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .app-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .app-button.secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .camera-view {
+            background: #000;
+            height: 400px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-placeholder {
+            color: white;
+            font-size: 4em;
+        }
+
+        .capture-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #667eea;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .capture-button:hover {
+            transform: scale(1.1);
+        }
+
+        .photo-result {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            position: relative;
+        }
+
+        .verification-watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.3em;
+            font-weight: 600;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .verification-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .code-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .demo-info {
+            color: white;
+        }
+
+        .demo-info h3 {
+            font-size: 2.8em;
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+
+        .demo-info p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+
+        .how-it-works {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 60px 40px;
+            margin-bottom: 60px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .step {
+            background: rgba(255,255,255,0.05);
+            padding: 35px;
+            border-radius: 20px;
+            border: 2px solid rgba(102,126,234,0.3);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .step:hover {
+            border-color: #667eea;
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2em;
+        }
+
+        .step h4 {
+            color: #f093fb;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .step p {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.7;
+        }
+
+        .tech-details {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .tech-details h5 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .tech-details ul {
+            list-style: none;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .tech-details li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .tech-details li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.4s;
+        }
+
+        .info-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(102,126,234,0.3);
+        }
+
+        .info-card h3 {
+            color: #f093fb;
+            font-size: 2em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .info-card p {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.9;
+            font-size: 1.05em;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 90px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 35px;
+            color: white;
+            box-shadow: 0 20px 60px rgba(102,126,234,0.4);
+        }
+
+        .cta-section h2 {
+            font-size: 3.5em;
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+
+        .cta-section p {
+            font-size: 1.4em;
+            margin-bottom: 45px;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            padding: 22px 60px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        footer {
+            background: rgba(10,10,21,0.8);
+            backdrop-filter: blur(10px);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        @media (max-width: 968px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 3em;
+            }
+
+            .section-title {
+                font-size: 2.5em;
+            }
+
+            .phone {
+                transform: rotateY(0deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="hero">
+        <div class="checkmark-logo">✓</div>
+        <h1>Checkmark</h1>
+        <p>Verify authenticity through cryptographic proof, not AI detection. Every photo, verified at capture.</p>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <h2 class="section-title">Interactive Demo</h2>
+            
+            <div class="demo-container">
+                <div class="phone-mockup">
+                    <div class="phone">
+                        <div class="phone-notch">
+                            <div class="camera-dot"></div>
+                            <div class="speaker"></div>
+                        </div>
+                        <div class="phone-screen">
+                            <div class="status-bar">
+                                <span>9:41</span>
+                                <span>📶 ●●●● 100%</span>
+                            </div>
+                            <div class="screen-content">
+                                <div class="home-screen" id="homeScreen">
+                                    <div class="home-time">
+                                        <h1>9:41</h1>
+                                        <p>Thursday, January 15</p>
+                                    </div>
+                                    <div class="app-grid">
+                                        <div class="app-icon" onclick="openApp('checkmark')">
+                                            <div class="app-icon-img checkmark-icon">✓</div>
+                                            <div class="app-label">Checkmark</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #34aadc 0%, #4fc3f7 100%);">📷</div>
+                                            <div class="app-label">Camera</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">📸</div>
+                                            <div class="app-label">Photos</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">💬</div>
+                                            <div class="app-label">Messages</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">📞</div>
+                                            <div class="app-label">Phone</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">📧</div>
+                                            <div class="app-label">Mail</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">🌐</div>
+                                            <div class="app-label">Safari</div>
+                                        </div>
+                                        <div class="app-icon">
+                                            <div class="app-icon-img" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">⚙️</div>
+                                            <div class="app-label">Settings</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="app-screen" id="checkmarkApp">
+                                    <div class="app-header">
+                                        <h2>Checkmark</h2>
+                                        <p style="font-size: 0.9em; opacity: 0.9;">Photo Verification System</p>
+                                    </div>
+                                    
+                                    <div class="permission-screen" id="permissionScreen">
+                                        <div class="permission-icon">📷</div>
+                                        <h3>Camera Access Required</h3>
+                                        <p>Checkmark needs access to your camera to capture and verify authentic photos with cryptographic signatures.</p>
+                                        <button class="app-button" onclick="grantPermission()">Allow Camera Access</button>
+                                        <button class="app-button secondary" onclick="closeApp()">Not Now</button>
+                                    </div>
+
+                                    <div style="display: none;" id="cameraScreen">
+                                        <div class="camera-view">
+                                            <div class="camera-placeholder">📸</div>
+                                        </div>
+                                        <div class="capture-button" onclick="takePhoto()"></div>
+                                        <p style="text-align: center; color: #666; padding: 0 20px; margin-top: 10px;">Photos are verified at capture with device signatures</p>
+                                    </div>
+
+                                    <div class="photo-result" style="display: none;" id="photoResult">
+                                        <div class="photo-preview">
+                                            📷
+                                            <div class="verification-watermark">
+                                                <span>✓</span>
+                                                <span>Verified</span>
+                                            </div>
+                                        </div>
+                                        <div class="verification-badge">
+                                            ✓ Photo Cryptographically Verified
+                                        </div>
+                                        <div class="code-display" id="verificationCode">
+                                            CHK-7X9K-M4P2-N8Q5
+                                        </div>
+                                        <p style="color: #666; font-size: 0.85em; margin-bottom: 15px;">
+                                            Captured: Jan 15, 2026 9:41:23 PST<br>
+                                            Device: iPhone 15 Pro (Verified)<br>
+                                            Location: San Francisco, CA
+                                        </p>
+                                        <button class="app-button">Share Verification Code</button>
+                                        <button class="app-button" style="background: #28a745;">Make Public</button>
+                                        <button class="app-button secondary" onclick="resetDemo()">Take Another Photo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-info">
+                    <h3>Try It Yourself</h3>
+                    <p>Click the Checkmark app on the phone to see how photo verification works. The app requests camera access, then captures photos with cryptographic proof of authenticity.</p>
+                    <p>Each verified photo includes a unique verification code, timestamp, device signature, and optional location data that can never be forged or altered.</p>
+                    <p>Users can choose to make their verified photos public, allowing anyone to view the original image and confirm its authenticity online.</p>
+                </div>
+            </div>
+
+            <div class="how-it-works">
+                <h2 class="section-title">How It Actually Works</h2>
+                <p style="color: rgba(255,255,255,0.9); text-align: center; font-size: 1.2em; max-width: 900px; margin: 0 auto 40px;">
+                    Unlike AI detection tools that try to spot fakes, Checkmark provides cryptographic proof of authenticity by verifying the photo at the moment of capture.
+                </p>
+                
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>Device Authentication</h4>
+                        <p>When you take a photo, Checkmark verifies your device's unique hardware signature using the device's Trusted Execution Environment (TEE) or Secure Enclave. This confirms the photo is coming from a real, uncompromised camera.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>Timestamp & Metadata Capture</h4>
+                        <p>We record the precise timestamp, GPS coordinates, camera settings, and device information at the moment of capture. This metadata is cryptographically signed and cannot be altered without detection.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>Camera Verification</h4>
+                        <p>We verify the camera isn't spoofed by checking hardware attestation certificates from the device manufacturer. This ensures the photo came from an authentic camera sensor, not a virtual camera or screen recording.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h4>Cryptographic Signing</h4>
+                        <p>The photo and its metadata are combined and signed using public-key cryptography. This creates an unforgeable mathematical proof linking the image to its capture moment and device.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <h4>Blockchain Recording</h4>
+                        <p>The signature and verification code are permanently recorded on a public blockchain. This creates an immutable, timestamped record that anyone can verify independently.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <h4>Public Verification</h4>
+                        <p>Anyone can enter your verification code on our website to confirm the photo's authenticity. If you make it public, they can also view the original verified image and all its metadata.</p>
+                    </div>
+                </div>
+
+                <div class="tech-details">
+                    <h5>🔐 Technical Implementation</h5>
+                    <ul>
+                        <li>Hardware-based device attestation (Apple Secure Enclave, Android StrongBox)</li>
+                        <li>Ed25519 digital signatures for cryptographic proof</li>
+                        <li>SHA-256 hashing for tamper detection</li>
+                        <li>NTP-synchronized timestamps with millisecond precision</li>
+                        <li>GPS coordinate verification against cell tower triangulation</li>
+                        <li>Ethereum blockchain for immutable public record</li>
+                        <li>Zero-knowledge proofs for privacy-preserving verification</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>The Problem</h3>
+                    <p>In 2026, AI can generate photorealistic images indistinguishable from reality. Anyone can edit photos seamlessly. There's no way to prove what's real. Journalists can't verify sources. Courts can't trust evidence. Social media is flooded with convincing fakes. Trust in visual media has collapsed.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Why Not AI Detection?</h3>
+                    <p>AI detection tools try to spot fakes by looking for artifacts and patterns. But they're playing catch-up—every time detection improves, generation gets better. They produce false positives and false negatives. They can't prove a photo is real, only guess whether it might be fake. We need proof, not probability.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Our Approach</h3>
+                    <p>Checkmark doesn't try to detect fakes. Instead, we provide cryptographic proof that a photo is authentic by verifying it at capture. Using device signatures, hardware attestation, and blockchain recording, we create unforgeable evidence that a photo is real. It's impossible to fake because the proof is mathematical, not algorithmic.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="cta-section">
+            <h2>Ready to Restore Trust?</h2>
+            <p>Join the movement to bring provable authenticity back to photography</p>
+            <button class="cta-button">Get Early Access</button>
+        </div>
+    </div>
+
+    <footer>
+        <p style="font-size: 1.2em; margin-bottom: 10px;">&copy; 2026 Checkmark. Cryptographic proof for authentic photography.</p>
+        <p style="opacity: 0.7;">Demo Version - Patent Pending Technology</p>
+    </footer>
+
+    <script>
+        function openApp(appName) {
+            if (appName === 'checkmark') {
+                document.getElementById('homeScreen').style.display = 'none';
+                document.getElementById('checkmarkApp').classList.add('active');
+            }
+        }
+
+        function closeApp() {
+            document.getElementById('checkmarkApp').classList.remove('active');
+            document.getElementById('homeScreen').style.display = 'block';
+        }
+
+        function grantPermission() {
+            document.getElementById('permissionScreen').style.display = 'none';
+            document.getElementById('cameraScreen').style.display = 'block';
+        }
+
+        function takePhoto() {
+            document.getElementById('cameraScreen').style.display = 'none';
+            document.getElementById('photoResult').style.display = 'block';
+            
+            const code = generateVerificationCode();
+            document.getElementById('verificationCode').textContent = code;
+        }
+
+        function generateVerificationCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = 'CHK';
+            for (let i = 0; i < 3; i++) {
+                code += '-';
+                for (let j = 0; j < 4; j++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+            }
+            return code;
+        }
+
+        function resetDemo() {
+            document.getElementById('photoResult').style.display = 'none';
+            document.getElementById('cameraScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
